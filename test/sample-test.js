@@ -71,33 +71,25 @@ describe("test for pair ",()=>{
         describe("if the require condition sastified",()=>{
             it("check",async()=>{
               const createPair =   await factory2.createPair(tokenA.address,tokenB.address);
-              const createPair1 =   await factory2.createPair(signer1.address,signer2.address);
-            //   console.log("create pair",createPair);
-                const _Pair = await factory2.getPair(tokenA.address, tokenB.address);
-                const _pair1 = await factory2.getPair(tokenB.address,tokenA.address);
+              const pairAddress = await factory2.getPair(tokenA.address,tokenB.address);
 
-                const pair_instance = await new UniswapV2Pair__factory(owner).attach(Pair);
+              console.log("pair address",pairAddress);
 
-                const pairToken0 = await pair.token0();
-                const pairToken1 = await pair.token1();
+              pair = await Pair.attach(pairAddress);
 
+              const pairToken0 = await pair.token0();
+              const pairToken1 = await pair.token1();
 
-                // expect(pairToken0).to.equal(tokenA.address);
-                // expect(pairToken1).to.equal(tokenB.address);
-                
+              expect(pairToken0).to.equal(tokenA.address);
+              expect(pairToken1).to.equal(tokenB.address);
 
-                const length = await factory2.allPairsLength();
-
-                expect(_Pair).to.equal(_pair1);
-                expect(length).to.equal(2);
-
-
+              const length = await factory2.allPairsLength();
+              expect(length).to.equal(1);
             })
 
         })
         describe("if the require condition not sastified",()=>{
             it("check",()=>{
-               // expect(factory2.createPair(tokenZero,tokenB.address)).to.be.revertedWith("UniswapV2: ZERO_ADDRESS");
                 expect(factory2.connect(owner).createPair(tokenA.address,tokenA.address)).to.be.revertedWith("UniswapV2: IDENTICAL_ADDRESSES");
                 expect(pair.initialize(tokenA.address,tokenB.address)).to.be.revertedWith('UniswapV2: FORBIDDEN');
             })
@@ -106,17 +98,11 @@ describe("test for pair ",()=>{
      })
      describe("length of the pairs ",()=>{
         it("return length",async()=>{
-        const create = await factory2.connect(owner).createPair(tokenA.address,tokenB.address);
-        const create1 = await factory2.connect(owner).createPair(signer1.address,signer2.address);
-        
-        const length = await factory2.allPairsLength();
-        expect(length).to.equal(2);
-            
+       
         })
-    })
-   
-     
-    })
-   
+        })
+
+    })    
+    
      
 
