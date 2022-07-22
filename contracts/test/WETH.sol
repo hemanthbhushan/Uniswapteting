@@ -1,3 +1,7 @@
+/**
+ *Submitted for verification at Etherscan.io on 2017-12-12
+*/
+
 // Copyright (C) 2015, 2016, 2017 Dapphub
 
 // This program is free software: you can redistribute it and/or modify
@@ -12,11 +16,10 @@
 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-//SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-contract WETH9 {
+contract WETH {
     string public name     = "Wrapped Ether";
     string public symbol   = "WETH";
     uint8  public decimals = 18;
@@ -29,18 +32,18 @@ contract WETH9 {
     mapping (address => uint)                       public  balanceOf;
     mapping (address => mapping (address => uint))  public  allowance;
 
-    // function() public payable {
-    //     deposit();
-    // }
+    receive() external payable {
+        deposit();
+    }
     function deposit() public payable {
         balanceOf[msg.sender] += msg.value;
-        emit Deposit(msg.sender, msg.value);
+      emit  Deposit(msg.sender, msg.value);
     }
     function withdraw(uint wad) public {
-        require(balanceOf[msg.sender] >= wad, "");
+        require(balanceOf[msg.sender] >= wad);
         balanceOf[msg.sender] -= wad;
         payable(msg.sender).transfer(wad);
-        emit Withdrawal(msg.sender, wad);
+      emit  Withdrawal(msg.sender, wad);
     }
 
     function totalSupply() public view returns (uint) {
@@ -49,7 +52,7 @@ contract WETH9 {
 
     function approve(address guy, uint wad) public returns (bool) {
         allowance[msg.sender][guy] = wad;
-        emit Approval(msg.sender, guy, wad);
+       emit Approval(msg.sender, guy, wad);
         return true;
     }
 
@@ -61,17 +64,17 @@ contract WETH9 {
         public
         returns (bool)
     {
-        require(balanceOf[src] >= wad, "");
+        require(balanceOf[src] >= wad);
 
         if (src != msg.sender && allowance[src][msg.sender] != type(uint).max) {
-            require(allowance[src][msg.sender] >= wad, "");
+            require(allowance[src][msg.sender] >= wad);
             allowance[src][msg.sender] -= wad;
         }
 
         balanceOf[src] -= wad;
         balanceOf[dst] += wad;
 
-        emit Transfer(src, dst, wad);
+       emit Transfer(src, dst, wad);
 
         return true;
     }
