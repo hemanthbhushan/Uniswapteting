@@ -1,59 +1,51 @@
-const { inputToConfig } = require("@ethereum-waffle/compiler");
-const { getSigners } = require("@nomiclabs/hardhat-ethers/dist/src/helpers");
-const { expect } = require("chai");
-const { ethers, waffle } = require("hardhat");
-const { isCallTrace } = require("hardhat/internal/hardhat-network/stack-traces/message-trace");
-const { getContractFactory } = require("hardhat/types");
-describe("testing",()=>{
-    let Pair;
-    let pair;
-    let Factory;
-    let factory2;
-    let test;
-    let owner;
-    let signer1;
-    let signer2;
-    let tokenA;
-    let tokenB;
-    let Router;
-    let router;
-    let WETH;
-    let TokenA;
-    let TokenB;
-    let wETH;
+const { ethers } = require("hardhat");
 
+describe("Testing", () => {
+    let owner, factory, router, tokenA, tokenB, wETH;
 
-    beforeEach(async ()=>{
-        [owner,signer1,signer2,tokenA,tokenB,test] = await ethers.getSigners();
+    beforeEach(async () => {
+        [owner] = await ethers.getSigners();
+        amountA = 1000;
+        amountB = 10000;
 
-        TokenA = await ethers.getContractFactory("TokenA");
+        const TokenA = await ethers.getContractFactory("TokenA");
+        const TokenB = await ethers.getContractFactory("TokenB");
+        const WETH = await ethers.getContractFactory("WETH");
+        const Factory = await ethers.getContractFactory("UniswapV2Factory");
+
+        factory = await Factory.deploy(owner.address);
+        await factory.deployed();
         tokenA = await TokenA.deploy();
-
-        TokenB = await ethers.getContractFactory("TokenB");
+        await tokenA.deployed();
         tokenB = await TokenB.deploy();
-
-        Factory = await ethers.getContractFactory("UniswapV2Factory");
-        factory2 = await Factory.deploy(signer1.address);
-
-        Pair = await ethers.getContractFactory("UniswapV2Pair",factory2.address);
-        pair = await Pair.deploy();
-        
-        WETH = await ethers.getContractFactory("WETH");
+        await tokenB.deployed();
         wETH = await WETH.deploy();
+        await wETH.deployed();
 
-        Router = await ethers.getContractFactory("UniswapV2Router02");
-        router = await Router.deploy(factory2.address,wETH.address);
+        await factory.createPair(tokenA.address, tokenB.address);
 
-        await  tokenA.mintToken(signer2.address,10000000);
-        await  tokenB.mintToken(signer2.address,100000);
-    })
-    describe("liquidity",()=>{
-        it("checking",async()=>{
-           const quidityFunction = await router.connect(signer2).addLiquidity(tokenA.address,tokenB.address,1000,1000,900,900,signer2.address,1658691676);   
-        //     console.log("tokenaddress",tokenA.address);
-        //     console.log("factory address",factory2.address);
-        //     console.log("eth address",wETH.address);
-        }); 
-    })
+        const Router = await ethers.getContractFactory("UniswapV2Router02");
+        router = await Router.deploy(factory.address, wETH.address);
+        await router.deployed();
 
+        await tokenA.approve(router.address, amountA);
+        await tokenB.approve(router.address, amountB);
+    });
+
+    it("Testing", async () => {
+        // Min amount must be 10000 tokens each
+
+        await tokenA.approve(router.address, 10000);
+        await tokenB.approve(router.address, 10000);
+        await router.addLiquidity(
+            tokenA.address,
+            tokenB.address,
+            10000,
+            10000,
+            9,
+            9,
+            owner.address,
+            1658666362
+        );
+    });
 });
